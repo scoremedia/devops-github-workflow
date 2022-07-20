@@ -29,11 +29,12 @@ jobs:
       - run: gem install kubernetes-deploy
       - name: Set Kubernetes Manifest Path
         run: |
-          if [ -z "${{ github.event.inputs.message }}" ]
+          echo "Environment is ${{ github.event.inputs.environment }}"
+          if [ -z "${{ github.event.inputs.template_dir }}" ]
           then
              KUBERNETES_MANIFEST_PATH=config/deploy/${{ github.event.inputs.environment }}
           else
-            KUBERNETES_MANIFEST_PATH=${{ github.event.inputs.message }}
+            KUBERNETES_MANIFEST_PATH=${{ github.event.inputs.template_dir }}
           fi      
       - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
         run: |
