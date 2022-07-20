@@ -29,7 +29,7 @@ jobs:
       - run: gem install kubernetes-deploy
       - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
         env:
-          k8s_manifest_path: ${{ inputs.template_dir == "" && config/deploy/{ inputs.environment} || { inputs.template_dir} }}
+          k8s_manifest_path: ${{ inputs.template_dir == "" && config/deploy/{ inputs.environment } || { inputs.template_dir } }}
         run: |
           kubernetes-render --template-dir $k8s_manifest_path | pluto detect - --target-versions k8s=${{ secrets.TARGET_K8S_VERSION }} --output json | curl -i -s -o /dev/null -w "%{http_code}" -X POST https://app.opslevel.com/integrations/custom_event/${{ secrets.OPSLEVEL_WEBHOOK_SECRET_PLUTO }}?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
 
