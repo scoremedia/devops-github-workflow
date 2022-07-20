@@ -31,7 +31,7 @@ jobs:
         run: |
           if [ -z "${{ github.event.inputs.message }}" ]
           then
-             KUBERNETES_MANIFEST_PATH=config/deploy/{{ github.event.inputs.environment }}
+             KUBERNETES_MANIFEST_PATH=config/deploy/${{ github.event.inputs.environment }}
           else
             KUBERNETES_MANIFEST_PATH=${{ github.event.inputs.message }}
           fi      
