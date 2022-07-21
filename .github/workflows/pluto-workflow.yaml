@@ -20,27 +20,23 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-      # - name: Download Pluto
-      #   uses: FairwindsOps/pluto/github-action@master
-      # - name: install Kubernetes-deploy(render)
-      #   uses: ruby/setup-ruby@v1
-      #   with:
-      #     ruby-version: 2.7
-      # - run: gem install activesupport -v 6.1.6
-      # - run: gem install kubernetes-deploy
+      - name: Download Pluto
+        uses: FairwindsOps/pluto/github-action@master
+      - name: install Kubernetes-deploy(render)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+      - run: gem install activesupport -v 6.1.6
+      - run: gem install kubernetes-deploy
       - name: Set Kubernetes Manifest Path
         run: |
-          echo "Service Name is ${{ inputs.service_name }}"
-          echo "Environment is ${{ inputs.environment }}"
           if [ -z "${{ inputs.template_dir }}" ]
           then
             echo "KUBERNETES_MANIFEST_PATH=config/deploy/${{ inputs.environment }}" >> $GITHUB_ENV
           else
             echo "KUBERNETES_MANIFEST_PATH=${{ inputs.template_dir }}" >> $GITHUB_ENV
           fi  
-          echo ">>> $KUBERNETES_MANIFEST_PATH"    
       - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
         run: |
-          echo "Kubernetes manifest path is ${{ env.KUBERNETES_MANIFEST_PATH }}"
-      #     kubernetes-render --template-dir $KUBERNETES_MANIFEST_PATH | pluto detect - --target-versions k8s=${{ secrets.TARGET_K8S_VERSION }} --output json | curl -i -s -o /dev/null -w "%{http_code}" -X POST https://app.opslevel.com/integrations/custom_event/${{ secrets.OPSLEVEL_WEBHOOK_SECRET_PLUTO }}?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
+          kubernetes-render --template-dir $KUBERNETES_MANIFEST_PATH | pluto detect - --target-versions k8s=${{ secrets.TARGET_K8S_VERSION }} --output json | curl -i -s -o /dev/null -w "%{http_code}" -X POST https://app.opslevel.com/integrations/custom_event/${{ secrets.OPSLEVEL_WEBHOOK_SECRET_PLUTO }}?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
 
