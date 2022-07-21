@@ -40,5 +40,5 @@ jobs:
           target_version: ${{ secrets.TARGET_K8S_VERSION }}
           opslevel_webhook_secret: ${{ secrets.OPSLEVEL_WEBHOOK_SECRET_PLUTO }}
         run: |
-          kubernetes-render --template-dir ${{ env.KUBERNETES_MANIFEST_PATH }} | pluto detect - --target-versions k8s={{ secrets.TARGET_K8S_VERSION }} --output json | curl -i -s -o /dev/null -w "%{http_code}" -X POST https://app.opslevel.com/integrations/custom_event/{{ env.opslevel_webhook_secret }}?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
+          kubernetes-render --template-dir ${{ env.KUBERNETES_MANIFEST_PATH }} | pluto detect - --target-versions k8s={{ env.TARGET_K8S_VERSION }} --output json | curl -i -s -o /dev/null -w "%{http_code}" -X POST https://app.opslevel.com/integrations/custom_event/{{ env.opslevel_webhook_secret }}?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
 
