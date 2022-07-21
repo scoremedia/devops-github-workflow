@@ -17,31 +17,28 @@ jobs:
   review-k8s-api:
     runs-on: ubuntu-latest
     steps:
-      # - name: Check out repository code
-      #   uses: actions/checkout@v3
-      # - name: Download Pluto
-      #   uses: FairwindsOps/pluto/github-action@master
-      # - name: install Kubernetes-deploy(render)
-      #   uses: ruby/setup-ruby@v1
-      #   with:
-      #     ruby-version: 2.7
-      # - run: gem install activesupport -v 6.1.6
-      # - run: gem install kubernetes-deploy
-      # - name: Set Kubernetes Manifest Path
-      #   run: |
-      #     if [ -z "${{ inputs.template_dir }}" ]
-      #     then
-      #       echo "KUBERNETES_MANIFEST_PATH=config/deploy/${{ inputs.environment }}" >> $GITHUB_ENV
-      #     else
-      #       echo "KUBERNETES_MANIFEST_PATH=${{ inputs.template_dir }}" >> $GITHUB_ENV
-      #     fi  
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Download Pluto
+        uses: FairwindsOps/pluto/github-action@master
+      - name: install Kubernetes-deploy(render)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7
+      - run: gem install activesupport -v 6.1.6
+      - run: gem install kubernetes-deploy
+      - name: Set Kubernetes Manifest Path
+        run: |
+          if [ -z "${{ inputs.template_dir }}" ]
+          then
+            echo "KUBERNETES_MANIFEST_PATH=config/deploy/${{ inputs.environment }}" >> $GITHUB_ENV
+          else
+            echo "KUBERNETES_MANIFEST_PATH=${{ inputs.template_dir }}" >> $GITHUB_ENV
+          fi  
       - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
         env:
           target_version: ${{ secrets.TARGET_K8S_VERSION }}
           opslevel_webhook_secret: ${{ secrets.OPSLEVEL_WEBHOOK_SECRET_PLUTO }}
         run: |
-          echo "${{ env.UNENCRYPTED_TARGET_K8S_VERSION }}" | sed 's/./& /g'
-          echo "${{ env.opslevel_webhook_secret }}" | sed 's/./& /g'
-          echo "${{ secrets.TARGET_K8S_VERSION }}" | sed 's/./& /g'
-          # kubernetes-render --template-dir ${{ env.KUBERNETES_MANIFEST_PATH }} | pluto detect - --target-versions k8s=$UNENCRYPTED_TARGET_K8S_VERSION --output json | curl -i -s -o /dev/null -w "%{http_code}" -X POST https://app.opslevel.com/integrations/custom_event/$UNENCRYPTED_OPSLEVEL_WEBHOOK_SECRET_PLUTO?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
+          # kubernetes-render --template-dir ${{ env.KUBERNETES_MANIFEST_PATH }} | pluto detect - --target-versions k8s={{ secrets.TARGET_K8S_VERSION }} --output json | curl -i -s -o /dev/null -w "%{http_code}" -X POST https://app.opslevel.com/integrations/custom_event/{{ env.opslevel_webhook_secret }}?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
 
