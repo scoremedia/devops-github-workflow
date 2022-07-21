@@ -39,8 +39,8 @@ jobs:
           else
             KUBERNETES_MANIFEST_PATH=${{ inputs.template_dir }}
           fi      
-      # - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
-      #   run: |
-      #     echo $KUBERNETES_MANIFEST_PATH
+      - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
+        run: |
+          echo $KUBERNETES_MANIFEST_PATH
       #     kubernetes-render --template-dir $KUBERNETES_MANIFEST_PATH | pluto detect - --target-versions k8s=${{ secrets.TARGET_K8S_VERSION }} --output json | curl -i -s -o /dev/null -w "%{http_code}" -X POST https://app.opslevel.com/integrations/custom_event/${{ secrets.OPSLEVEL_WEBHOOK_SECRET_PLUTO }}?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
 
