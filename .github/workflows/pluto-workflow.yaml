@@ -36,11 +36,14 @@ jobs:
             echo "KUBERNETES_MANIFEST_PATH=${{ inputs.template_dir }}" >> $GITHUB_ENV
           fi  
       - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
+        shell: bash
         env:
           target_version: ${{ secrets.TARGET_K8S_VERSION }}
           opslevel_webhook_secret: ${{ secrets.OPSLEVEL_WEBHOOK_SECRET_PLUTO }}
         run: |
           echo "--target-versions k8s={{ env.target_version }}"
+          echo "--target-versions k8s=$target_version"
           echo "https://app.opslevel.com/integrations/custom_event/{{ env.opslevel_webhook_secret }}?"
+          echo "https://app.opslevel.com/integrations/custom_event/$opslevel_webhook_secret?"
           # kubernetes-render --template-dir ${{ env.KUBERNETES_MANIFEST_PATH }} | pluto detect - --target-versions k8s={{ env.target_version }} --output json | curl -i -s -o /dev/null -w "%{http_code}" -X POST https://app.opslevel.com/integrations/custom_event/{{ env.opslevel_webhook_secret }}?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
 
