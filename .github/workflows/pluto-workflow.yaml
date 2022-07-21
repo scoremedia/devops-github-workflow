@@ -31,13 +31,13 @@ jobs:
       - name: Set Kubernetes Manifest Path
         run: |
           printenv
-          echo "Service Name is ${{ github.event.inputs.service_name }}"
-          echo "Environment is ${{ github.event.inputs.environment }}"
-          if [ -z "${{ github.event.inputs.template_dir }}" ]
+          echo "Service Name is ${{ inputs.service_name }}"
+          echo "Environment is ${{ inputs.environment }}"
+          if [ -z "${{ inputs.template_dir }}" ]
           then
-             KUBERNETES_MANIFEST_PATH=config/deploy/${{ github.event.inputs.environment }}
+             KUBERNETES_MANIFEST_PATH=config/deploy/${{ inputs.environment }}
           else
-            KUBERNETES_MANIFEST_PATH=${{ github.event.inputs.template_dir }}
+            KUBERNETES_MANIFEST_PATH=${{ inputs.template_dir }}
           fi      
       # - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
       #   run: |
