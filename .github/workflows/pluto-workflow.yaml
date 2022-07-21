@@ -30,6 +30,7 @@ jobs:
       # - run: gem install kubernetes-deploy
       - name: Set Kubernetes Manifest Path
         run: |
+          printenv
           echo "Service Name is ${{ github.event.inputs.service_name }}"
           echo "Environment is ${{ github.event.inputs.environment }}"
           if [ -z "${{ github.event.inputs.template_dir }}" ]
