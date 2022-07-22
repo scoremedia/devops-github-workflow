@@ -41,5 +41,5 @@ jobs:
           UNENCRYPTED_TARGET_VERSION: ${{ secrets.TARGET_K8S_VERSION }}
           UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL: ${{ secrets.OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL }}
         run: |
-          kubernetes-render --bindings="image=a,environment=${{ inputs.environment }}" --template-dir $KUBERNETES_MANIFEST_PATH | pluto detect - --target-versions k8s=$UNENCRYPTED_TARGET_VERSION --output json
+          kubernetes-render --bindings="image=a,environment=${{ inputs.environment }}" --template-dir $KUBERNETES_MANIFEST_PATH | pluto detect - --target-versions k8s=$UNENCRYPTED_TARGET_VERSION --ignore-deprecations --ignore-removals --output json | curl -i -s -X POST $UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
 
