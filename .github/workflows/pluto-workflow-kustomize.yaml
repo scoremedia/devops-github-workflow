@@ -16,13 +16,15 @@ on:
 jobs:
   review-k8s-api:
     runs-on: ubuntu-latest
+    container:
+      image: bitnami/kubectl:1.22.12
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Download Pluto
         uses: FairwindsOps/pluto/github-action@v5.10.3
-      - name: Install Kubectl
-        uses: actions-hub/kubectl@v1.24.3
+      # - name: Install Kubectl
+      #   uses: actions-hub/kubectl@v1.24.3
       - name: Set Kubernetes Manifest Path
         run: |
           if [ -z "${{ inputs.template_dir }}" ]
