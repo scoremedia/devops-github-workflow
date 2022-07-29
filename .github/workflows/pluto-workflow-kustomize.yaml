@@ -20,7 +20,9 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Download Pluto
-        uses: FairwindsOps/pluto/github-action@master
+        uses: FairwindsOps/pluto/github-action@v5.10.3
+      - name: Install Kubectl
+        uses: actions-hub/kubectl@v1.24.3
       - name: Set Kubernetes Manifest Path
         run: |
           if [ -z "${{ inputs.template_dir }}" ]
@@ -30,7 +32,6 @@ jobs:
             echo "KUBERNETES_MANIFEST_PATH=${{ inputs.template_dir }}" >> $GITHUB_ENV
           fi  
       - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
-        uses: actions-hub/kubectl@v1.24.3
         shell: bash
         env:
           UNENCRYPTED_TARGET_VERSION: ${{ secrets.TARGET_K8S_VERSION }}
