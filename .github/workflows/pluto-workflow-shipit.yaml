@@ -31,5 +31,5 @@ jobs:
           UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL: ${{ secrets.OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL }}
         run: |
           # image=random_value needed just to render Kubernetes manifests
-          kubernetes-render --bindings="image=random_value,environment=${{ inputs.environment }}" --template-dir ${{ inputs.template_dir }} | pluto detect - --target-versions k8s=$UNENCRYPTED_TARGET_VERSION --ignore-deprecations --ignore-removals --output json | curl -i -s -X POST $UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
+          kubernetes-render --bindings="image=random_value,cluster=random_cluster_value,environment=${{ inputs.environment }}" --template-dir ${{ inputs.template_dir }} | pluto detect - --target-versions k8s=$UNENCRYPTED_TARGET_VERSION --ignore-deprecations --ignore-removals --output json | curl -i -s -X POST $UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
 
