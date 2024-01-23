@@ -22,7 +22,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Download Pluto
-        uses: FairwindsOps/pluto/github-action@v5.10.3
+        uses: FairwindsOps/pluto/github-action@v5.19.0
       - name: install Kubernetes-deploy(render)
         uses: ruby/setup-ruby@v1
         with:

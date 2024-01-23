@@ -17,7 +17,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
       - name: Download Pluto
-        uses: FairwindsOps/pluto/github-action@v5.11.2
+        uses: FairwindsOps/pluto/github-action@v5.19.0
       - name: Install all-in-one Kubernetes tools in a package.
         uses: yokawasa/action-setup-kube-tools@v0.9.3
         with:
