@@ -45,7 +45,7 @@ jobs:
           # Generate a manifest file
           ## Kustomize
           if [[ -n "${{ inputs.template_dir }}" ]]; then
-            kubectl kustomize ${{ inputs.template_dir }} --output=$MANIFEST_FILE | 
+            kubectl kustomize ${{ inputs.template_dir }} --output=$MANIFEST_FILE
 
           ## Helm
           else
