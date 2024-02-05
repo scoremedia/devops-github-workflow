@@ -54,4 +54,6 @@ jobs:
           fi
 
           # Send the manifest file to Pluto
-          cat $MANIFEST_FILE | pluto detect - --target-versions k8s=$UNENCRYPTED_TARGET_VERSION --ignore-deprecations --ignore-removals --output json | curl -i -s -X POST $UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
+          # cat $MANIFEST_FILE | pluto detect - --target-versions k8s=$UNENCRYPTED_TARGET_VERSION --ignore-deprecations --ignore-removals --output json | curl -i -s -X POST $UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
+
+          cat $MANIFEST_FILE | pluto detect - --target-versions k8s=$UNENCRYPTED_TARGET_VERSION --ignore-deprecations --ignore-removals --output json
