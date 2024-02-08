@@ -10,6 +10,18 @@ on:
         required: false
         type: string
         default: ""
+        description: "(For Kustomize deployment method) a path to a directory containing 'kustomization.yaml'"
+      values_base:
+        required: false
+        type: string
+        default: ""
+        description: "(For Helm chart deployment method) Specify a path of base values.yaml (or equivalent)"
+      values_overlay:
+        required: false
+        type: string
+        default: ""
+        description: "(For Helm chart deployment method) Specify a path of overlay values.yaml (or equivalent)"
+
 jobs:
   review-k8s-api:
     runs-on: ubuntu-latest
@@ -28,5 +40,16 @@ jobs:
           UNENCRYPTED_TARGET_VERSION: ${{ secrets.TARGET_K8S_VERSION }}
           UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL: ${{ secrets.OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL }}
         run: |
-          kubectl kustomize ${{ inputs.template_dir }} | pluto detect - --target-versions k8s=$UNENCRYPTED_TARGET_VERSION --ignore-deprecations --ignore-removals --output json | curl -i -s -X POST $UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL?alias=${{ inputs.service_name }} -H 'content-type: application/json' --data-binary @-
+          MANIFEST_FILE=manifest.yaml
 
+          # Generate a manifest file
+          ## Kustomize
+          if [[ -n "${{ inputs.template_dir }}" ]]; then
+            kubectl kustomize "${{ inputs.template_dir }}" --output="$MANIFEST_FILE"
+
+          ## Helm
+          else
+            helm template "charts/${{ inputs.service_name }}" --values "${{ inputs.values_base }}" --values "${{ inputs.values_overlay }}" > "$MANIFEST_FILE"
+          fi
+
+          pluto detect - --target-versions "k8s=$UNENCRYPTED_TARGET_VERSION" --ignore-deprecations --ignore-removals --output json < "$MANIFEST_FILE" | curl -i -s -X POST "$UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL?alias=${{ inputs.service_name }}" -H 'content-type: application/json' --data-binary @-
