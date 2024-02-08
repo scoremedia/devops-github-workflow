@@ -45,11 +45,11 @@ jobs:
           # Generate a manifest file
           ## Kustomize
           if [[ -n "${{ inputs.template_dir }}" ]]; then
-            kubectl kustomize "${{ inputs.template_dir }}" "--output=$MANIFEST_FILE"
+            kubectl kustomize "${{ inputs.template_dir }}" --output="$MANIFEST_FILE"
 
           ## Helm
           else
-            helm template "charts/${{ inputs.service_name }}" "--values ${{ inputs.values_base }}" "--values ${{ inputs.values_overlay }}" > "$MANIFEST_FILE"
+            helm template "charts/${{ inputs.service_name }}" --values "${{ inputs.values_base }}" --values "${{ inputs.values_overlay }}" > "$MANIFEST_FILE"
           fi
 
-          pluto detect - "--target-versions k8s=$UNENCRYPTED_TARGET_VERSION" --ignore-deprecations --ignore-removals --output json < "$MANIFEST_FILE" | curl -i -s -X POST "$UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL?alias=${{ inputs.service_name }}" -H 'content-type: application/json' --data-binary @-
+          pluto detect - --target-versions "k8s=$UNENCRYPTED_TARGET_VERSION" --ignore-deprecations --ignore-removals --output json < "$MANIFEST_FILE" | curl -i -s -X POST "$UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL?alias=${{ inputs.service_name }}" -H 'content-type: application/json' --data-binary @-
