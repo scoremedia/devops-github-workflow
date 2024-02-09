@@ -55,7 +55,7 @@ jobs:
           ## Helm
           else
             # if an user wishes to customize a Helm chart to use
-            CHART_NAME=$([ -n "${{ inputs.chart_name }}" ] && echo "${{ inputs.service_name }}" || echo "${{ inputs.chart_name }}")
+            CHART_NAME=$([ -n "${{ inputs.chart_name }}" ] && echo "${{ inputs.chart_name }}" || echo "${{ inputs.service_name }}")
 
             helm template "charts/$CHART_NAME" --values "${{ inputs.values_base }}" --values "${{ inputs.values_overlay }}" > "$MANIFEST_FILE"
           fi
