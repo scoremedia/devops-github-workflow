@@ -21,6 +21,11 @@ on:
         type: string
         default: ""
         description: "(For Helm chart deployment method) Specify a path of overlay values.yaml (or equivalent)"
+      chart_name:
+        required: false
+        type: string
+        default: ""
+        description: "(For Helm chart deployment method) Use this to manually set chart name. For example, corebook is using edgebook chart."
 
 jobs:
   review-k8s-api:
@@ -55,7 +60,10 @@ jobs:
 
           ## Helm
           else
-            helm template "charts/${{ inputs.service_name }}" --values "${{ inputs.values_base }}" --values "${{ inputs.values_overlay }}" > "$MANIFEST_FILE"
+            # if an user wishes to customize a Helm chart to use
+            CHART_NAME=$([ -n "${{ inputs.chart_name }}" ] && echo "${{ inputs.chart_name }}" || echo "${{ inputs.service_name }}")
+
+            helm template "charts/$CHART_NAME" --values "${{ inputs.values_base }}" --values "${{ inputs.values_overlay }}" > "$MANIFEST_FILE"
           fi
 
           pluto detect - --target-versions "k8s=$UNENCRYPTED_TARGET_VERSION" --ignore-deprecations --ignore-removals --output json < "$MANIFEST_FILE" | curl -i -s -X POST "$UNENCRYPTED_OPSLEVEL_PLUTO_INTEGRATION_WEBHOOK_URL?alias=${{ inputs.service_name }}" -H 'content-type: application/json' --data-binary @-
