@@ -38,7 +38,7 @@ jobs:
         with:
           ref: non-prod
           sparse-checkout: values
-        if: ${{ inputs.service_name }} == 'casino'
+        if: ${{ inputs.service_name  == 'casino' }}
       - name: Download Pluto
         uses: FairwindsOps/pluto/github-action@v5.19.0
       - name: Install all-in-one Kubernetes tools in a package.
