@@ -34,11 +34,9 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Check out repository code (Casino)
-        uses: actions/checkout@v4
-        with:
-          ref: non-prod
-          sparse-checkout: values
         if: ${{ inputs.service_name  == 'casino' }}
+        run:
+          git fetch && git checkout origin/non-prod -- values
       - name: Download Pluto
         uses: FairwindsOps/pluto/github-action@v5.19.0
       - name: Install all-in-one Kubernetes tools in a package.
