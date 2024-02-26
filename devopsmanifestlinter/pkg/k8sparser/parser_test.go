@@ -2,6 +2,7 @@ package k8sparser_test
 
 import (
 	"devopsmanifestlinter/pkg/k8sparser"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -9,85 +10,21 @@ import (
 )
 
 func TestParseDeployment(t *testing.T) {
-	deploymentYaml := `
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-  labels:
-    app: nginx
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.14.2
-        ports:
-        - containerPort: 80
-`
+	deploymentYaml, err := os.ReadFile("testdata/a_deployment.yaml")
+	require.NoError(t, err)
 
 	p := k8sparser.NewParser()
-	res, err := p.DecodeResource([]byte(deploymentYaml))
+	res, err := p.DecodeResource(deploymentYaml)
 	require.NoError(t, err)
-	require.IsType(t, (&v1.Deployment{}).GetName(), res)
+	require.IsType(t, &v1.Deployment{}, res)
 }
 
 func TestParseDeploymentStream(t *testing.T) {
-	deploymentYaml := `
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-  labels:
-    app: nginx
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.14.2
-        ports:
-        - containerPort: 80
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-  labels:
-    app: nginx
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.14.2
-        ports:
-        - containerPort: 80
-`
+	deploymentYaml, err := os.ReadFile("testdata/two_deployments.yaml")
+	require.NoError(t, err)
 
 	p := k8sparser.NewParser()
-	resources, err := p.DecodeResourceStream([]byte(deploymentYaml))
+	resources, err := p.DecodeResourceStream(deploymentYaml)
 	require.NoError(t, err)
 
 	for _, resource := range resources {
