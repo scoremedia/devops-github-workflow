@@ -36,7 +36,7 @@ spec:
 	p := k8sparser.NewParser()
 	res, err := p.DecodeResource([]byte(deploymentYaml))
 	require.NoError(t, err)
-	require.IsType(t, &v1.Deployment{}, res)
+	require.IsType(t, (&v1.Deployment{}).GetName(), res)
 }
 
 func TestParseDeploymentStream(t *testing.T) {

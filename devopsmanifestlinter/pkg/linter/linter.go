@@ -3,7 +3,7 @@
 package linter
 
 type Check interface {
-	Validate(resources []interface{}) (bool, error)
+	Validate(resources []interface{}) (bool, []error)
 }
 
 // A Linter is a type that can run a list of checks against lists of
@@ -28,8 +28,8 @@ func (l *Linter) Validate(resources []interface{}) []error {
 	collectedErrors := []error{}
 
 	for _, check := range l.checks {
-		if ok, err := check.Validate(resources); !ok {
-			collectedErrors = append(collectedErrors, err)
+		if ok, errs := check.Validate(resources); !ok {
+			collectedErrors = append(collectedErrors, errs...)
 		}
 	}
 
