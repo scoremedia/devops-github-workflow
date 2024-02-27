@@ -27,11 +27,29 @@ func main() {
 
 	linter.AddCheck(&checks.SingleHpaPerScalableResource{})
 	linter.AddCheck(&checks.NonZeroPodDisruptionBudgets{})
-	linter.AddCheck(&checks.AlwaysFails{})
+
+	// Now that a check has been actually implemented and can fail, I don't
+	// need to include an always failing test.
+	//
+	// To make the SingleHpaPerScalableResource fail, just pipe in two
+	// copies of a compiled helm template with an HPA (the HPA will target
+	// the deployment twice).
+	//
+	// This is also demonstrated in `singlehpaperscalableresource_test.go`.
+	//
+	// But if you want to verify what happens when tests fail, uncomment
+	// the line below.
+	//
+	// linter.AddCheck(&checks.AlwaysFails{})
 
 	failures := linter.Validate(resources)
 
+	exitStatus := 0
+
 	for _, failure := range failures {
-		fmt.Printf("devops-manifest-lint: %s\n", failure)
+		fmt.Fprintf(os.Stderr, "devops-manifest-lint: %s\n", failure)
+		exitStatus = 1
 	}
+
+	os.Exit(exitStatus)
 }
