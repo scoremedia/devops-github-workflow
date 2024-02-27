@@ -31,7 +31,7 @@ func (s *SingleHpaPerScalableResource) Validate(resources []interface{}) (bool, 
 			}
 
 			errs = append(errs, fmt.Errorf(
-				"%s %s is targetted by multiple HPAs (%s)",
+				"%s %s is targeted by multiple HPAs (%s)",
 				resource.(Resource).GetObjectKind().GroupVersionKind().Kind,
 				resource.(Resource).GetName(),
 				strings.Join(hpaNames, ", "),
