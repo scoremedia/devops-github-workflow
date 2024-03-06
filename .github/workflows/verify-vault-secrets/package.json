@@ -1,0 +1,16 @@
+{
+    "name": "verify-vault-secrets",
+    "version": "1.0.0",
+    "description": "GitHub Action to verify secrets exist in Vault",
+    "scripts": {
+      "test": "jest"
+    },
+    "jest": {
+      "testEnvironment": "node"
+    },
+    "devDependencies": {
+      "jest": "^27.0.0",
+      "axios": "^0.24.0"
+    }
+  }
+  
