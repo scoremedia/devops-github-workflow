@@ -1,12 +1,17 @@
 const axios = require('axios');
+const { Octokit } = require('@octokit/rest');
+
 
 module.exports = async ({ github, context, core }) => {
   const vault_token = core.getInput('vault_token');
+  const github_token = core.getInput('github_token');
   const service = core.getInput('service');
   const edges = core.getInput('edges');
   const environments = core.getInput('environments');
   const vault_addr_prod = core.getInput('vault_addr_prod');
   const vault_addr_non_prod = core.getInput('vault_addr_non_prod');
+
+  const octokit = new Octokit({ auth: `token ${github_token}` });
 
   const envVarsRegex = /System\.fetch_env!\("(\\.|[^"\\])*"\)/g;
 
@@ -44,7 +49,31 @@ module.exports = async ({ github, context, core }) => {
     return missingVars;
   };
 
-  const envVars = extractEnvVars(context);
+  const prFiles = await octokit.pulls.listFiles({
+    owner: context.repo.owner,
+    repo: context.repo.repo,
+    pull_number: context.payload.pull_request.number,
+  });
+
+  let envVars = [];
+  for (const file of prFiles.data) {
+    console.log(`file name: ${file.filename}`);
+    if (file.status !== 'removed') {
+      console.log(`file updated: ${file.filename}`);
+      const fileContent = await octokit.repos.getContent({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        path: file.filename,
+        ref: context.payload.pull_request.head.sha,
+      });
+      const fileData = Buffer.from(fileContent.data.content, 'base64').toString();
+      console.log(`file content: ${fileData}`)
+      const fileEnvVars = extractEnvVars(fileData);
+      console.log(`file env vars: ${fileEnvVars}`)
+      envVars = envVars.concat(fileEnvVars);
+    }
+  }
+
   let missingVar = false;
   let failureFlag = false;
 
