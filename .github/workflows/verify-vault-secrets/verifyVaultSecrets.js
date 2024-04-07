@@ -1,9 +1,13 @@
 const axios = require('axios');
 
-module.exports = async ({ inputs, runtimeContent, core }) => {
-  const { vault_token, service, edges, environments } = inputs;
-  const VAULT_ADDR_PROD = 'https://vault.prod.thescore.is';
-  const VAULT_ADDR_NON_PROD = 'https://vault.non-prod.thescore.is';
+module.exports = async ({ github, context, core }) => {
+  const vault_token = core.getInput('vault_token');
+  const service = core.getInput('service');
+  const edges = core.getInput('edges');
+  const environments = core.getInput('environments');
+  const vault_addr_prod = core.getInput('vault_addr_prod');
+  const vault_addr_non_prod = core.getInput('vault_addr_non_prod');
+
   const envVarsRegex = /System\.fetch_env!\("(\\.|[^"\\])*"\)/g;
 
   const extractEnvVars = (runtimeContent) => {
@@ -14,7 +18,7 @@ module.exports = async ({ inputs, runtimeContent, core }) => {
   };
 
   const getVaultAddr = (environment) => {
-    return environment === 'production' ? VAULT_ADDR_PROD : VAULT_ADDR_NON_PROD;
+    return environment === 'production' ? vault_addr_prod : vault_addr_non_prod;
   };
 
   const checkVaultSecrets = async (vaultToken, environment, edge, service) => {
@@ -40,7 +44,7 @@ module.exports = async ({ inputs, runtimeContent, core }) => {
     return missingVars;
   };
 
-  const envVars = extractEnvVars(runtimeContent);
+  const envVars = extractEnvVars(context);
   let missingVar = false;
   let failureFlag = false;
 
