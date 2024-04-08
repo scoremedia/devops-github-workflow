@@ -1,7 +1,6 @@
 const axios = require('axios');
 
 module.exports = async ({ github, context, core }) => {
-  const tst = core.getInput('tst');
   const vault_token = core.getInput('vault_token');
   const service = core.getInput('service');
   const edges = core.getInput('edges');
@@ -9,7 +8,6 @@ module.exports = async ({ github, context, core }) => {
   const vault_addr_prod = core.getInput('vault_addr_prod');
   const vault_addr_non_prod = core.getInput('vault_addr_non_prod');
 
-  console.log('tst', tst);
   console.log('token', vault_token);
   console.log('service', service);
   console.log('edges', edges);
