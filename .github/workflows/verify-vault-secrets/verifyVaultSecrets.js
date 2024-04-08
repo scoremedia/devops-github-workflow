@@ -9,7 +9,7 @@ module.exports = async ({ github, context, core }) => {
   const vault_addr_prod = core.getInput('vault_addr_prod');
   const vault_addr_non_prod = core.getInput('vault_addr_non_prod');
 
-  const envVarsRegex = /System\.fetch_env!\("(\\.|[^"\\])*"\)/g;
+  const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
   const extractEnvVars = (runtimeContent) => {
     const matches = runtimeContent.matchAll(envVarsRegex);
