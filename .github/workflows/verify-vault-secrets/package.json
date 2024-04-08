@@ -13,6 +13,6 @@
         "jest": "^27.0.0"
     },
     "dependencies": {
-        "@octokit/rest": "^20.1.0"
+        "@actions/github": "^6.0.0"
     }
 }
