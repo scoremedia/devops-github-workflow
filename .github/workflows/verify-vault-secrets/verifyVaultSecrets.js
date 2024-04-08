@@ -1,13 +1,19 @@
 const axios = require('axios');
 
 module.exports = async ({ github, context, core }) => {
-  console.log(github)
   const vault_token = core.getInput('vault_token');
   const service = core.getInput('service');
   const edges = core.getInput('edges');
   const environments = core.getInput('environments');
   const vault_addr_prod = core.getInput('vault_addr_prod');
   const vault_addr_non_prod = core.getInput('vault_addr_non_prod');
+
+  console.log('token', vault_token);
+  console.log('service', service);
+  console.log('edges', edges);
+  console.log('environments', environments);
+  console.log('vault_addr_prod', vault_addr_prod);
+  console.log('vault_addr_non_prod', vault_addr_non_prod);
 
   const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
@@ -52,19 +58,17 @@ module.exports = async ({ github, context, core }) => {
 
   let envVars = [];
   for (const file of prFiles.data) {
-    console.log(`file name: ${file.filename}`);
     if (file.status !== 'removed') {
-      console.log(`file updated: ${file.filename}`);
       const fileContent = await github.rest.repos.getContent({
         owner: context.repo.owner,
         repo: context.repo.repo,
         path: file.filename,
         ref: context.payload.pull_request.head.sha,
       });
+
       const fileData = Buffer.from(fileContent.data.content, 'base64').toString();
       const fileEnvVars = extractEnvVars(fileData);
 
-      console.log(`file env vars: ${fileEnvVars}`)
       envVars = envVars.concat(fileEnvVars);
     }
   }
