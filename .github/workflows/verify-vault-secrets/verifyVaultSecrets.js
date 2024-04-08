@@ -12,9 +12,8 @@ module.exports = async ({ github, context, core }) => {
   const envVarsRegex = /System\.fetch_env!\("(\\.|[^"\\])*"\)/g;
 
   const extractEnvVars = (runtimeContent) => {
-    console.log('runtimeContent: ', runtimeContent);
     const matches = runtimeContent.matchAll(envVarsRegex);
-    console.log('matches: ', matches);
+    console.log(matches);
     return Array.from(matches, (match) => match[1]);
   };
 
@@ -63,8 +62,8 @@ module.exports = async ({ github, context, core }) => {
         ref: context.payload.pull_request.head.sha,
       });
       const fileData = Buffer.from(fileContent.data.content, 'base64').toString();
-      console.log(`file content: ${fileData}`)
       const fileEnvVars = extractEnvVars(fileData);
+
       console.log(`file env vars: ${fileEnvVars}`)
       envVars = envVars.concat(fileEnvVars);
     }
