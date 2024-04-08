@@ -45,7 +45,7 @@ module.exports = async ({ github, context, core }) => {
     return missingVars;
   };
 
-  const prFiles = await github.pulls.listFiles({
+  const prFiles = await github.rest.pulls.listFiles({
     owner: context.repo.owner,
     repo: context.repo.repo,
     pull_number: context.payload.pull_request.number,
@@ -56,7 +56,7 @@ module.exports = async ({ github, context, core }) => {
     console.log(`file name: ${file.filename}`);
     if (file.status !== 'removed') {
       console.log(`file updated: ${file.filename}`);
-      const fileContent = await github.repos.getContent({
+      const fileContent = await github.rest.repos.getContent({
         owner: context.repo.owner,
         repo: context.repo.repo,
         path: file.filename,
