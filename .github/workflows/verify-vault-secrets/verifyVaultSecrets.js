@@ -9,8 +9,6 @@ module.exports = async ({ github, context, core }) => {
   const vault_addr_prod = core.getInput('vault_addr_prod');
   const vault_addr_non_prod = core.getInput('vault_addr_non_prod');
 
-  const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
-
   const envVarsRegex = /System\.fetch_env!\("(\\.|[^"\\])*"\)/g;
 
   const extractEnvVars = (runtimeContent) => {
