@@ -18,8 +18,8 @@ module.exports = async ({ github, context, core }) => {
   const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
   const extractEnvVars = (runtimeContent) => {
+    console.log(runtimeContent);
     const matches = runtimeContent.matchAll(envVarsRegex);
-    console.log(matches);
     return Array.from(matches, (match) => match[1]);
   };
 
