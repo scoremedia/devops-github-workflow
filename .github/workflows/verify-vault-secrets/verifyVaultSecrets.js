@@ -20,6 +20,7 @@ module.exports = async ({ github, context, core }) => {
   const extractEnvVars = (runtimeContent) => {
     console.log(runtimeContent);
     const matches = runtimeContent.matchAll(envVarsRegex);
+    console.log('matches', matches);
     return Array.from(matches, (match) => match[1]);
   };
 
@@ -31,7 +32,7 @@ module.exports = async ({ github, context, core }) => {
     return environment === 'production' ? prodVaultToken : nonProdVaultToken;
   };
 
-  const checkVaultSecrets = async (vaultToken, environment, edge, service) => {
+  const checkVaultSecrets = async (environment, edge, service) => {
     const url = `${getVaultAddr(environment)}/v1/scorebet/subkeys/${service}/${environment}/${edge}`;
     
     try {
@@ -81,16 +82,15 @@ module.exports = async ({ github, context, core }) => {
 
   for (const environment of environments.split(',')) {
     console.log(`Processing environment: ${environment}`);
-    const vaultAddr = getVaultAddr(environment);
 
     for (const edge of edges.split(',')) {
       console.log(`Processing edge: ${edge}`)
       try {
-        const response = await checkVaultSecrets(vault_token, environment, edge, service);
+        const response = await checkVaultSecrets(environment, edge, service);
         const missingVars = checkEnvVarsInResponse(envVars, response);
 
         if (missingVars.length > 0) {
-          console.error(`Secrets ${missingVars.join(', ')} not found at ${vaultAddr}/v1/scorebet/subkeys/${service}/${environment}/${edge}`);
+          console.error(`Secrets ${missingVars.join(', ')} not found at ${getVaultAddr(environment)}/v1/scorebet/subkeys/${service}/${environment}/${edge}`);
           missingVar = true;
         }
       } catch (error) {
