@@ -33,6 +33,11 @@ module.exports = async ({ github, context, core }) => {
   const checkVaultSecrets = async (environment, edge, service) => {
     const url = `${getVaultAddr(environment)}/v1/scorebet/subkeys/${service}/${environment}/${edge}`;
     console.log(getVaultToken(environment));
+    
+    getVaultToken(environment).forEach(element => {
+      console.log(element);
+    });
+
     try {
       const response = await axios({
         method: 'get',
