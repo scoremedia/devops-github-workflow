@@ -14,6 +14,8 @@ module.exports = async ({ github, context, core }) => {
   console.log('environments', environments);
   console.log('vault_addr_prod', vaultAddrProd);
   console.log('vault_addr_non_prod', vaultAddrNonProd);
+  console.log('non prod token', nonProdVaultToken);
+  console.log('prod token', prodVaultToken);
 
   const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
