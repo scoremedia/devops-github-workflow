@@ -18,9 +18,7 @@ module.exports = async ({ github, context, core }) => {
   const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
   const extractEnvVars = (runtimeContent) => {
-    console.log(runtimeContent);
     const matches = runtimeContent.matchAll(envVarsRegex);
-    console.log('matches', matches);
     return Array.from(matches, (match) => match[1]);
   };
 
@@ -42,9 +40,11 @@ module.exports = async ({ github, context, core }) => {
         headers: { 'X-Vault-Token': getVaultToken(environment) },
       });
 
+      console.log('response', response)
+
       return response.data;
     } catch (error) {
-      console.error(`Failed to retrieve secrets from ${url}`);
+      console.error(`Failed to retrieve secrets from ${url}. Error: ${error}`);
       throw error;
     }
   };
@@ -72,8 +72,6 @@ module.exports = async ({ github, context, core }) => {
 
       const fileData = Buffer.from(fileContent.data.content, 'base64').toString();
       const fileEnvVars = extractEnvVars(fileData);
-
-      console.log(fileEnvVars);
 
       envVars = envVars.concat(fileEnvVars);
     }
