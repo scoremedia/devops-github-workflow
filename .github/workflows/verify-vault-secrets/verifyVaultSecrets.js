@@ -1,19 +1,19 @@
 const axios = require('axios');
 
 module.exports = async ({ github, context, core }) => {
-  const vault_token = core.getInput('vault_token');
+  const nonProdVaultToken = core.getInput('non_prod_vault_token');
+  const prodVaultToken = core.getInput('prod_vault_token');
   const service = core.getInput('service');
   const edges = core.getInput('edges');
   const environments = core.getInput('environments');
-  const vault_addr_prod = core.getInput('vault_addr_prod');
-  const vault_addr_non_prod = core.getInput('vault_addr_non_prod');
+  const vaultAddrProd = core.getInput('vault_addr_prod');
+  const vaultAddrNonProd = core.getInput('vault_addr_non_prod');
 
-  console.log('token', vault_token);
   console.log('service', service);
   console.log('edges', edges);
   console.log('environments', environments);
-  console.log('vault_addr_prod', vault_addr_prod);
-  console.log('vault_addr_non_prod', vault_addr_non_prod);
+  console.log('vault_addr_prod', vaultAddrProd);
+  console.log('vault_addr_non_prod', vaultAddrNonProd);
 
   const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
@@ -24,18 +24,21 @@ module.exports = async ({ github, context, core }) => {
   };
 
   const getVaultAddr = (environment) => {
-    return environment === 'production' ? vault_addr_prod : vault_addr_non_prod;
+    return environment === 'production' ? vaultAddrProd : vaultAddrNonProd;
+  };
+
+  const getVaultToken = (environment) => {
+    return environment === 'production' ? prodVaultToken : nonProdVaultToken;
   };
 
   const checkVaultSecrets = async (vaultToken, environment, edge, service) => {
-    const vaultAddr = getVaultAddr(environment);
-    const url = `${vaultAddr}/v1/scorebet/subkeys/${service}/${environment}/${edge}`;
+    const url = `${getVaultAddr(environment)}/v1/scorebet/subkeys/${service}/${environment}/${edge}`;
     
     try {
       const response = await axios({
         method: 'get',
         url,
-        headers: { 'X-Vault-Token': vaultToken },
+        headers: { 'X-Vault-Token': getVaultToken(environment) },
       });
 
       return response.data;
