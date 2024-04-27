@@ -1,7 +1,7 @@
 module.exports = async ({ github, context, core }) => {
   const retrievedKeys = core.getInput('keys');
 
-  console.log('keys', keys);
+  console.log('keys', retrievedKeys);
 
   const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
