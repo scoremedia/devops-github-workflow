@@ -9,7 +9,6 @@
         "testEnvironment": "node"
     },
     "devDependencies": {
-        "axios": "^0.24.0",
         "jest": "^27.0.0"
     },
     "dependencies": {

@@ -1,62 +1,13 @@
-const axios = require('axios');
-
 module.exports = async ({ github, context, core }) => {
-  const nonProdVaultToken = core.getInput('non_prod_vault_token');
-  const prodVaultToken = core.getInput('prod_vault_token');
-  const service = core.getInput('service');
-  const edges = core.getInput('edges');
-  const environments = core.getInput('environments');
-  const vaultAddrProd = core.getInput('vault_addr_prod');
-  const vaultAddrNonProd = core.getInput('vault_addr_non_prod');
+  const retrievedKeys = core.getInput('keys');
 
-  console.log('service', service);
-  console.log('edges', edges);
-  console.log('environments', environments);
-  console.log('vault_addr_prod', vaultAddrProd);
-  console.log('vault_addr_non_prod', vaultAddrNonProd);
+  console.log('keys', keys);
 
   const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
   const extractEnvVars = (runtimeContent) => {
     const matches = runtimeContent.matchAll(envVarsRegex);
     return Array.from(matches, (match) => match[1]);
-  };
-
-  const getVaultAddr = (environment) => {
-    return environment === 'production' ? vaultAddrProd : vaultAddrNonProd;
-  };
-
-  const getVaultToken = (environment) => {
-    return environment === 'production' ? prodVaultToken : nonProdVaultToken;
-  };
-
-  const checkVaultSecrets = async (environment, edge, service) => {
-    const url = `${getVaultAddr(environment)}/v1/scorebet/subkeys/${service}/${environment}/${edge}`;
-    console.log(getVaultToken(environment));
-
-    for (var i = 0; i < getVaultToken(environment).length; i++) {
-      console.log(getVaultToken(environment).charAt(i));
-    };
-
-    try {
-      const response = await axios({
-        method: 'get',
-        url,
-        headers: { 'X-Vault-Token': getVaultToken(environment) },
-      });
-
-      console.log('response', response)
-
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to retrieve secrets from ${url}. Error: ${error}`);
-      throw error;
-    }
-  };
-
-  const checkEnvVarsInResponse = (envVars, response) => {
-    const missingVars = envVars.filter((envVar) => !response.includes(envVar));
-    return missingVars;
   };
 
   const prFiles = await github.rest.pulls.listFiles({
@@ -84,25 +35,8 @@ module.exports = async ({ github, context, core }) => {
 
   let missingVar = false;
   let failureFlag = false;
-
-  for (const environment of environments.split(',')) {
-    console.log(`Processing environment: ${environment}`);
-
-    for (const edge of edges.split(',')) {
-      console.log(`Processing edge: ${edge}`)
-      try {
-        const response = await checkVaultSecrets(environment, edge, service);
-        const missingVars = checkEnvVarsInResponse(envVars, response);
-
-        if (missingVars.length > 0) {
-          console.error(`Secrets ${missingVars.join(', ')} not found at ${getVaultAddr(environment)}/v1/scorebet/subkeys/${service}/${environment}/${edge}`);
-          missingVar = true;
-        }
-      } catch (error) {
-        failureFlag = true;
-      }
-    }
-  }
+  
+  envVars.filter((envVar) => !retrievedKeys.includes(envVar));
 
   if (failureFlag) {
     core.error('Failed to retrieve secrets from Vault for one or more environment or edge');
