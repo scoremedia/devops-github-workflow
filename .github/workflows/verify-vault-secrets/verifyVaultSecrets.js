@@ -1,7 +1,5 @@
 module.exports = async ({ github, context, core }) => {
-  const retrievedKeys = core.getInput('keys');
-
-  console.log('keys', retrievedKeys);
+  const retrievedVaultKeys = core.getInput('keys');
 
   const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
@@ -32,17 +30,12 @@ module.exports = async ({ github, context, core }) => {
       envVars = envVars.concat(fileEnvVars);
     }
   }
-
-  let missingVar = false;
-  let failureFlag = false;
   
-  envVars.filter((envVar) => !retrievedKeys.includes(envVar));
+  const undefinedEnvVars = envVars.filter((envVar) => !retrievedVaultKeys.includes(envVar));
+  console.log(undefinedEnvVars);
 
-  if (failureFlag) {
-    core.error('Failed to retrieve secrets from Vault for one or more environment or edge');
-    core.setFailed();
-  } else if (missingVar) {
-    core.error('One or more environment variables are missing from Vault');
+  if (undefinedEnvVars.length > 0) {
+    core.error(`Environment variables missing from Vault: ${undefinedEnvVars}`);
     core.setFailed();
   } else {
     console.log('All secrets found.');
