@@ -1,15 +1,15 @@
-module.exports = async ({ github, context, core }) => {
+const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
+
+function extractReferencedEnvVars(fileData, ignoredKeys) {
+  const matches = fileData.matchAll(envVarsRegex);
+  const extractedEnvVars = Array.from(matches, (match) => match[1]);
+
+  return extractedEnvVars.filter((envVar) => !ignoredKeys.includes(envVar))
+}
+
+async function verifyVaultSecrets({ github, context, core }) {
   const retrievedVaultKeys = core.getInput('keys');
   const ignoredKeys = core.getInput('ignored_keys').split(',');
-
-  const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
-
-  const extractReferencedEnvVars = (runtimeContent) => {
-    const matches = runtimeContent.matchAll(envVarsRegex);
-    const extractedEnvVars = Array.from(matches, (match) => match[1]);
-
-    return extractedEnvVars.filter((envVar) => !ignoredKeys.includes(envVar))
-  };
 
   const prFiles = await github.rest.pulls.listFiles({
     owner: context.repo.owner,
@@ -28,7 +28,8 @@ module.exports = async ({ github, context, core }) => {
       });
 
       const fileData = Buffer.from(fileContent.data.content, 'base64').toString();
-      const fileEnvVars = extractReferencedEnvVars(fileData);
+
+      const fileEnvVars = extractReferencedEnvVars(fileData, ignoredKeys);
 
       referencedEnvVars = referencedEnvVars.concat(fileEnvVars);
     }
@@ -43,3 +44,12 @@ module.exports = async ({ github, context, core }) => {
     console.log('All secrets found.');
   }
 };
+
+if (process.env.NODE_ENV === 'test') {
+  module.exports = {
+    verifyVaultSecrets,
+    extractReferencedEnvVars, // Exported for testing purposes
+  };
+} else {
+  module.exports = verifyVaultSecrets;
+}

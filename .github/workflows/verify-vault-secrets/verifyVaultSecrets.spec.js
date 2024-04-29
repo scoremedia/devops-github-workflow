@@ -1,81 +1,84 @@
-const axios = require('axios');
-const action = require('./verifyVaultSecrets');
+const { extractReferencedEnvVars, verifyVaultSecrets } = require('./verifyVaultSecrets');
+const github = require('@actions/github');
+const core = require('@actions/core');
 
-jest.mock('axios');
-
-describe('Verify Vault Secrets Tests', () => {
-  afterEach(() => {
-    jest.resetAllMocks();
+describe('extractReferencedEnvVars', () => {
+  test('should extract referenced environment variables from file content', () => {
+    const fileContent = 'System.fetch_env!("DATABASE_URL") + System.fetch_env!("API_KEY")';
+    const extractedEnvVars = extractReferencedEnvVars(fileContent, []);
+    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY']);
   });
 
-  it('should handle successful retrieval of secrets', async () => {
-    axios.mockResolvedValue({ data: 'SECRET1 SECRET2'});
+  test('should filter out ignored environment variables', () => {
+    const runtimeContent = 'System.fetch_env!("DATABASE_URL") + System.fetch_env!("API_KEY")';
+    const ignoredKeys = ['API_KEY'];
 
-    const core = {
-      error: jest.fn(),
-      setFailed: jest.fn(),
-    };
-
-    const inputs = {
-      vault_token: 'dummyToken',
-      service: 'dummyService',
-      edges: 'edge1,edge2',
-      environments: 'production,staging',
-    };
-
-    const runtimeContent = 'System.fetch_env!("SECRET1") System.fetch_env!("SECRET2")';
-
-    await action({ inputs, runtimeContent, core });
-
-    expect(axios).toHaveBeenCalledTimes(4);
-
-    expect(core.error).not.toHaveBeenCalled();
-    expect(core.setFailed).not.toHaveBeenCalled();
+    const extractedEnvVars = extractReferencedEnvVars(runtimeContent, ignoredKeys);
+    
+    const filteredEnvVars = extractedEnvVars.filter((envVar) => !ignoredKeys.includes(envVar));
+    expect(filteredEnvVars).toEqual(['DATABASE_URL']);
   });
 
-  it('should handle missing environment variables', async () => {
-    axios.mockResolvedValue({ data: 'SECRET1 SECRET3'});
+  test('should return an empty array if no environment variables are referenced', () => {
+    const runtimeContent = 'console.log("Hello, world!")';
+    const extractedEnvVars = extractReferencedEnvVars(runtimeContent);
+    expect(extractedEnvVars).toEqual([]);
+  });
+});
 
-    const core = {
-      error: jest.fn(),
-      setFailed: jest.fn(),
-    };
+// Mock GitHub API for unit testing
+jest.mock('@actions/github', () => ({
+  rest: {
+    pulls: {
+      listFiles: jest.fn(() => ({
+        data: [
+          { filename: 'config.js', status: 'modified' },
+        ],
+      })),
+    },
+    repos: {
+      getContent: jest.fn((params) => ({
+        data: { content: btoa('System.fetch_env!("DATABASE_URL")\nSystem.fetch_env!("API_KEY")') },
+      })),
+    },
+  },
+}));
 
-    const inputs = {
-      vault_token: 'dummyToken',
-      service: 'dummyService',
-      edges: 'edge1,edge2',
-      environments: 'production,staging',
-    };
-
-    const runtimeContent = 'System.fetch_env!("SECRET1") System.fetch_env!("SECRET2") System.fetch_env!("SECRET3")';
-
-    await action({ inputs, runtimeContent, core });
-
-    expect(core.error).toHaveBeenCalledWith('One or more environment variables are missing from Vault');
-    expect(core.setFailed).toHaveBeenCalled();
+describe('GitHub Action Script', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should handle error in axios call', async () => {
-    axios.mockRejectedValue(new Error('Failed to retrieve secrets'));
+  const context = { repo: { owner: 'user', repo: 'repo' }, payload: { pull_request: { number: 123, head: { sha: 'abc123' } } } };
 
-    const core = {
-      error: jest.fn(),
-      setFailed: jest.fn(),
-    };
+  test('should detect missing environment variables', async () => {
+    // retrieved keys = DATABASE_URL, ignored keys = ''
+    core.getInput = jest.fn().mockReturnValue('').mockReturnValueOnce('DATABASE_URL');
+    const coreErrorSpy = jest.spyOn(core, 'error');
 
-    const inputs = {
-      vault_token: 'dummyToken',
-      service: 'dummyService',
-      edges: 'edge1,edge2',
-      environments: 'production,staging',
-    };
+    await verifyVaultSecrets({ github, context, core });
+    expect(coreErrorSpy).toHaveBeenCalledWith('Environment variables missing from Vault: API_KEY');
+  });
 
-    const runtimeContent = 'System.fetch_env!("SECRET1") System.fetch_env!("SECRET2")';
+  test('should succeed when missing environment variables have been explicitly ignored', async () => {
+    // retrieved keys = DATABASE_URL, ignored keys = API_KEY
+    core.getInput = jest.fn().mockReturnValue('').mockReturnValueOnce('DATABASE_URL').mockReturnValueOnce('API_KEY');
+    const coreErrorSpy = jest.spyOn(core, 'error');
+    const consoleSpy = jest.spyOn(global.console, 'log')
 
-    await action({ inputs, runtimeContent, core });
+    await verifyVaultSecrets({ github, context, core });
+    expect(coreErrorSpy).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith('All secrets found.');
+  });
 
-    expect(core.error).toHaveBeenCalledWith('Failed to retrieve secrets from Vault for one or more environment or edge');
-    expect(core.setFailed).toHaveBeenCalled();
+  test('should log success message if all secrets are found', async () => {
+    // retrieved keys = DATABASE_URL, ignored keys = ''
+    core.getInput = jest.fn().mockReturnValue('').mockReturnValue('DATABASE_URL,API_KEY');
+    const coreErrorSpy = jest.spyOn(core, 'error');
+    const consoleSpy = jest.spyOn(global.console, 'log')
+
+    await verifyVaultSecrets({ github, context, core });
+    expect(coreErrorSpy).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith('All secrets found.');
   });
 });
