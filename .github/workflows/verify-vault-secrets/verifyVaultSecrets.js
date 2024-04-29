@@ -1,11 +1,14 @@
 module.exports = async ({ github, context, core }) => {
   const retrievedVaultKeys = core.getInput('keys');
+  const ignoredKeys =  core.getInput('ignoredKeys');
 
   const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
-  const extractEnvVars = (runtimeContent) => {
+  const extractReferencedEnvVars = (runtimeContent) => {
     const matches = runtimeContent.matchAll(envVarsRegex);
-    return Array.from(matches, (match) => match[1]);
+    const extractedEnvVars = Array.from(matches, (match) => match[1]);
+
+    return extractedEnvVars.filter((envVar) => !ignoredKeys.includes(envVar))
   };
 
   const prFiles = await github.rest.pulls.listFiles({
@@ -14,7 +17,7 @@ module.exports = async ({ github, context, core }) => {
     pull_number: context.payload.pull_request.number,
   });
 
-  let envVars = [];
+  let referencedEnvVars = [];
   for (const file of prFiles.data) {
     if (file.status !== 'removed') {
       const fileContent = await github.rest.repos.getContent({
@@ -25,14 +28,13 @@ module.exports = async ({ github, context, core }) => {
       });
 
       const fileData = Buffer.from(fileContent.data.content, 'base64').toString();
-      const fileEnvVars = extractEnvVars(fileData);
+      const fileEnvVars = extractReferencedEnvVars(fileData);
 
       envVars = envVars.concat(fileEnvVars);
     }
   }
   
-  const undefinedEnvVars = envVars.filter((envVar) => !retrievedVaultKeys.includes(envVar));
-  console.log(undefinedEnvVars);
+  const undefinedEnvVars = referencedEnvVars.filter((envVar) => !retrievedVaultKeys.includes(envVar));
 
   if (undefinedEnvVars.length > 0) {
     core.error(`Environment variables missing from Vault: ${undefinedEnvVars}`);
