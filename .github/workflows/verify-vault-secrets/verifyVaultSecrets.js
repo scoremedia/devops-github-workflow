@@ -30,7 +30,7 @@ module.exports = async ({ github, context, core }) => {
       const fileData = Buffer.from(fileContent.data.content, 'base64').toString();
       const fileEnvVars = extractReferencedEnvVars(fileData);
 
-      envVars = envVars.concat(fileEnvVars);
+      referencedEnvVars = referencedEnvVars.concat(fileEnvVars);
     }
   }
   
