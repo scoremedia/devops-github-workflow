@@ -1,6 +1,6 @@
 module.exports = async ({ github, context, core }) => {
   const retrievedVaultKeys = core.getInput('keys');
-  const ignoredKeys =  core.getInput('ignoredKeys');
+  const ignoredKeys =  core.getInput('ignored_keys');
 
   const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
 
