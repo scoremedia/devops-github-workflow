@@ -1,4 +1,4 @@
-const envVarsRegex = /System\.fetch_env!\("([^"]+)"\)/g;
+const envVarsRegex = /[A-Z0-9_]{2,}/g;
 
 function extractReferencedEnvVars(fileData, ignoredKeys) {
   const matches = fileData.matchAll(envVarsRegex);
