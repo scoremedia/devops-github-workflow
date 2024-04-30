@@ -4,9 +4,9 @@ const core = require('@actions/core');
 
 describe('extractReferencedEnvVars', () => {
   test('should extract referenced environment variables from file content', () => {
-    const fileContent = 'System.fetch_env!("DATABASE_URL") + System.fetch_env!("API_KEY")';
+    const fileContent = 'System.fetch_env!("DATABASE_URL") + System.fetch_env("API_KEY") + System.get_env("API_KEY_2", "default")';
     const extractedEnvVars = extractReferencedEnvVars(fileContent, []);
-    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY']);
+    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2']);
   });
 
   test('should filter out ignored environment variables', () => {
