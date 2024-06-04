@@ -22,11 +22,12 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - name: Download Pluto
-        uses: FairwindsOps/pluto/github-action@v5.19.0
-      - name: install Kubernetes-deploy(render)
+        uses: FairwindsOps/pluto/github-action@v5.19.4
+      - name: install Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: 2.7
+          rubygems: 3.3.22
       - run: gem install activesupport -v 6.1.6
       - run: gem install kubernetes-deploy
       - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
