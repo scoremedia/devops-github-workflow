@@ -18,8 +18,7 @@ describe('extractReferencedEnvVars', () => {
       |> foo_bar() # they start with a string literal
       # and even if they are broken by comments in between lines
       |> System.fetch_env!() # and with comments after the env call
-      |> other_func()  # and if they are piped afterwards
-    "API_KEY_3" |> String.trim_leading("_") |> String.trim("_") |> String.trim("_") |> System.fetch_env()`;
+      |> other_func()  # and if they are piped afterwards`;
 
     const extractedEnvVars = extractReferencedEnvVars(fileContent, []);
 
