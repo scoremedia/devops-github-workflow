@@ -1,5 +1,5 @@
 const directRegex = /System\.(?:fetch_env!|fetch_env|get_env)\(*["']([^"']+)["'](?:,\s*([^)]+))?\)*/g
-const pipedRegex = /\(*["']([^"']+)["'](?:,\s*([^)]+))?\)*\s*\n*\s*\|>\s*\n*\s*System\.(?:fetch_env!|fetch_env|get_env)/g
+const pipedRegex = /["']([^"']+)["']\s*\n*\s*\|>\s*\n*\s*System\.(?:fetch_env!|fetch_env|get_env)/g
 
 function extractReferencedEnvVars(fileData, ignoredKeys) {
   const directMatches = fileData.matchAll(directRegex);
