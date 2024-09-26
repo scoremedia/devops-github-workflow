@@ -1,4 +1,4 @@
-const envVarsRegex = /System\.(fetch_env!|fetch_env|get_env)\(["']([^"']+)["'](?:,\s*([^)]+))?\)/g;
+const envVarsRegex = /System\.(get_env\/fetch_env\/fetch_env!|fetch_env!|fetch_env|get_env)\(["']([^"']+)["'](?:,\s*([^)]+))?\)/g;
 
 function extractReferencedEnvVars(fileData, ignoredKeys) {
   const matches = fileData.matchAll(envVarsRegex);
