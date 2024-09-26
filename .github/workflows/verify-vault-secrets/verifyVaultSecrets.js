@@ -1,8 +1,13 @@
-const envVarsRegex = /System\.(fetch_env!|fetch_env|get_env)\(["']([^"']+)["'](?:,\s*([^)]+))?\)/g;
+const systemEnvPattern = `System\\.(fetch_env!|fetch_env|get_env)`;
+const stringLiteralPattern = `(["']([^"']+)["'])`;
+const pipe_operator = `\\|\\>`;
+const envVarPipelinePattern = `(${stringLiteralPattern}(\\s+(${pipe_operator}\\s+[.\\w\\!\\?]+\\(.*\\))|(\\s*#\\s+.+)?)*\\s+(${pipe_operator})\\s+${systemEnvPattern}\\(\\))`;
+const envVarStandardCallPattern = `(${systemEnvPattern}\\(${stringLiteralPattern}+(?:,\\s*([^)]+))?\\))`;
+const envVarsRegex = new RegExp(`${envVarPipelinePattern}|${envVarStandardCallPattern}`, "gm");
 
 function extractReferencedEnvVars(fileData, ignoredKeys) {
   const matches = fileData.matchAll(envVarsRegex);
-  const extractedEnvVars = Array.from(matches, (match) => match[2]);
+  const extractedEnvVars = Array.from(matches, (match) => match[3] ?? match[12]);
 
   return extractedEnvVars.filter((envVar) => !ignoredKeys.includes(envVar))
 }
