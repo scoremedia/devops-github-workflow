@@ -5,7 +5,7 @@ function extractReferencedEnvVars(fileData, ignoredKeys) {
   const directMatches = fileData.matchAll(directRegex);
   const pipedMatches = fileData.matchAll(pipedRegex);
   
-  const extractedEnvVars = Array.from(directMatches, (match) => match[0]) + Array.from(pipedMatches, (match) => match[0]);
+  const extractedEnvVars = Array.from(directMatches, (match) => match[0]).concat(Array.from(pipedMatches, (match) => match[0]));
 
   return extractedEnvVars.filter((envVar) => !ignoredKeys.includes(envVar))
 }
