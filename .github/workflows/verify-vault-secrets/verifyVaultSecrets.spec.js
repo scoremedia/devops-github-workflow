@@ -9,6 +9,22 @@ describe('extractReferencedEnvVars', () => {
     expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2']);
   });
 
+  test('should extract referenced environment variables when the pipe syntax is used', () => {
+    const fileContent = `
+    "DATABASE_URL" |> System.fetch_env!()
+    "API_KEY" |> String.trim_leading("_") |> System.fetch_env()
+    "API_KEY_2" # should match pipelines like this, too, even with comments, as long as
+      |> baz() #
+      |> foo_bar() # they start with a string literal
+      # and even if they are broken by comments in between lines
+      |> System.fetch_env!() # and with comments after the env call
+      |> other_func()  # and if they are piped afterwards`;
+
+    const extractedEnvVars = extractReferencedEnvVars(fileContent, []);
+
+    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2']);
+  });
+
   test('should filter out ignored environment variables', () => {
     const runtimeContent = 'System.fetch_env!("DATABASE_URL") + System.fetch_env!("API_KEY")';
     const ignoredKeys = ['API_KEY'];
