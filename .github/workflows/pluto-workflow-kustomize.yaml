@@ -38,7 +38,12 @@ jobs:
         run:
           git fetch && git checkout origin/non-prod -- values
       - name: Download Pluto
-        uses: FairwindsOps/pluto/github-action@v5.19.0
+        shell: bash
+        run: |
+          image=us-docker.pkg.dev/fairwinds-ops/oss/pluto:v5
+
+          docker pull "$image"
+          docker cp "$(docker create --rm "$image"):/pluto" /usr/local/bin/pluto
       - name: Install all-in-one Kubernetes tools in a package.
         uses: yokawasa/action-setup-kube-tools@v0.9.3
         with:
