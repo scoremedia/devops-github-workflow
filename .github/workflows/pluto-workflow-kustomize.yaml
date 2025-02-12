@@ -39,6 +39,10 @@ jobs:
         run:
           git fetch && git checkout origin/non-prod -- values
 
+      - name: Install podman for pluto
+        shell: bash
+        run: apt install podman -y
+
       - name: Download Pluto
         uses: FairwindsOps/pluto/github-action@v5.19.0
 
