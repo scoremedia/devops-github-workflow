@@ -33,16 +33,25 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+
       - name: Check out repository code (Casino)
         if: ${{ inputs.service_name  == 'casino' }}
         run:
           git fetch && git checkout origin/non-prod -- values
+
       - name: Download Pluto
         uses: FairwindsOps/pluto/github-action@v5.19.0
+
       - name: Install all-in-one Kubernetes tools in a package.
         uses: yokawasa/action-setup-kube-tools@v0.9.3
         with:
           kubectl: '1.26.13'
+
+      - name: Auth with jfrog for deps
+        uses: scorebet/jfrog-auth-action@0.0.10
+        with:
+          artifact-type: "helm"
+
       - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
         shell: bash
         env:
@@ -61,6 +70,7 @@ jobs:
             # if an user wishes to customize a Helm chart to use
             CHART_NAME=$([ -n "${{ inputs.chart_name }}" ] && echo "${{ inputs.chart_name }}" || echo "${{ inputs.service_name }}")
 
+            helm dependency build "charts/$CHART_NAME"
             helm template "charts/$CHART_NAME" --values "${{ inputs.values_base }}" --values "${{ inputs.values_overlay }}" > "$MANIFEST_FILE"
           fi
 
