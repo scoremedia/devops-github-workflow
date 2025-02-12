@@ -29,7 +29,7 @@ on:
 
 jobs:
   review-k8s-api:
-    runs-on: internal-github-action-runner-light
+    runs-on: non-prod-scorebet-org-runner
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
