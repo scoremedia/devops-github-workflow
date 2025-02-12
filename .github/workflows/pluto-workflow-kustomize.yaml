@@ -29,7 +29,9 @@ on:
 
 jobs:
   review-k8s-api:
-    runs-on: non-prod-scorebet-org-runner
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
