@@ -29,7 +29,7 @@ on:
 
 jobs:
   review-k8s-api:
-    runs-on: ubuntu-latest
+    runs-on: internal-github-action-runner-light
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
