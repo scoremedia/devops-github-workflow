@@ -43,7 +43,8 @@ jobs:
           image=us-docker.pkg.dev/fairwinds-ops/oss/pluto:v5
 
           docker pull "$image"
-          docker cp "$(docker create --rm "$image"):/pluto" /usr/local/bin/pluto
+          docker cp "$(docker create --rm "$image"):/pluto" /tmp/pluto
+          sudo mv /tmp/pluto /usr/local/bin/pluto
       - name: Install all-in-one Kubernetes tools in a package.
         uses: yokawasa/action-setup-kube-tools@v0.9.3
         with:
