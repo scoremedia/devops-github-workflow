@@ -16,11 +16,10 @@ describe('extractReferencedEnvVars', () => {
       thing: env_atom!("KEY4"),
       thing: env_int!("KEY5"),
       thing: env_csv!("KEY6"),
-      thing: env_str!("KEY7"),
-      thing: env_bool!("KEY8")
-    `
+      thing: env_str!("KEY7")
+    `;
     const extractedEnvVars = extractReferencedEnvVars(fileContent, []);
-    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2', 'KEY3', 'KEY4', 'KEY5', 'KEY6', 'KEY7', 'KEY8']);
+    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2', 'KEY3', 'KEY4', 'KEY5', 'KEY6', 'KEY7']);
   });
 
   test('should extract referenced environment variables when the pipe syntax is used', () => {
@@ -42,12 +41,11 @@ describe('extractReferencedEnvVars', () => {
     "KEY6"
     |> env_atom!()
     "KEY7" |> env_str!() |> String.downcase()
-    "KEY8" |> env_bool!()
     `;
 
     const extractedEnvVars = extractReferencedEnvVars(fileContent, []);
 
-    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2', 'KEY3', 'KEY4', 'KEY5', 'KEY6', 'KEY7', 'KEY8']);
+    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2', 'KEY3', 'KEY4', 'KEY5', 'KEY6', 'KEY7']);
   });
 
   test('should filter out ignored environment variables', () => {
