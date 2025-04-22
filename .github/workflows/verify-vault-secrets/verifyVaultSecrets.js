@@ -1,4 +1,4 @@
-const systemEnvPattern = `System\\.(fetch_env!|fetch_env|get_env)`;
+const systemEnvPattern = `(System\\.fetch_env!|System\\.fetch_env|System\\.get_env|fetch_env!|env_int!|env_atom!|env_csv!|env_str!)`;
 const stringLiteralPattern = `(["']([^"']+)["'])`;
 const pipe_operator = `\\|\\>`;
 const envVarPipelinePattern = `(${stringLiteralPattern}(\\s+(${pipe_operator}\\s+[.\\w\\!\\?]+\\(.*\\))|(\\s*#\\s+.+)?)*\\s+(${pipe_operator})\\s+${systemEnvPattern}\\(\\))`;
