@@ -29,14 +29,13 @@ on:
 
 jobs:
   review-k8s-api:
-    runs-on: non-prod-scorebet-org-runner
+    runs-on: internal-github-action-runner-light
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - name: Check out repository code (Casino)
-        if: ${{ inputs.service_name  == 'casino' }}
-        run:
-          git fetch && git checkout origin/non-prod -- values
+
+      - uses: scorebet/gcp-auth-action@main
+
       - name: Download Pluto
         shell: bash
         run: |
@@ -45,14 +44,17 @@ jobs:
           docker pull "$image"
           docker cp "$(docker create --rm "$image"):/pluto" /tmp/pluto
           sudo mv /tmp/pluto /usr/local/bin/pluto
+
       - name: Install all-in-one Kubernetes tools in a package.
         uses: yokawasa/action-setup-kube-tools@v0.9.3
         with:
           kubectl: '1.26.13'
+
       - name: Auth with jfrog for deps
         uses: scorebet/jfrog-auth-action@0.0.10
         with:
           artifact-type: "helm"
+
       - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
         shell: bash
         env:
