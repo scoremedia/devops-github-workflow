@@ -37,7 +37,13 @@ jobs:
       - uses: scorebet/gcp-auth-action@main
 
       - name: Download Pluto
-        uses: FairwindsOps/pluto/github-action@v5.21.7
+        shell: bash
+        run: |
+          image=us-docker.pkg.dev/fairwinds-ops/oss/pluto:v5
+
+          docker pull "$image"
+          docker cp "$(docker create --rm "$image"):/pluto" /tmp/pluto
+          sudo mv /tmp/pluto /usr/local/bin/pluto
 
       - name: Install all-in-one Kubernetes tools in a package.
         uses: yokawasa/action-setup-kube-tools@v0.9.3
