@@ -34,6 +34,8 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
+      - uses: scorebet/gcp-auth-action@main
+
       - name: Download Pluto
         shell: bash
         run: |
@@ -52,8 +54,6 @@ jobs:
         uses: scorebet/jfrog-auth-action@0.0.10
         with:
           artifact-type: "helm"
-
-      - uses: scorebet/gcp-auth-action@main
 
       - name: Run Pluto to scan K8S Manifest and send a report to OpsLevel
         shell: bash
