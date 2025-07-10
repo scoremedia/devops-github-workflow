@@ -4,9 +4,22 @@ const core = require('@actions/core');
 
 describe('extractReferencedEnvVars', () => {
   test('should extract referenced environment variables from file content', () => {
-    const fileContent = 'System.fetch_env!("DATABASE_URL") + System.fetch_env("API_KEY") + System.get_env("API_KEY_2", "default")';
+    const fileContent = `
+    config :app, App.Repo,
+      url: System.fetch_env!("DATABASE_URL")
+      
+    some_var = System.fetch_env("API_KEY")
+    other_var = System.get_env("API_KEY_2", "default")
+
+    config :app, 
+      thing: fetch_env!("KEY3"),
+      thing: env_atom!("KEY4"),
+      thing: env_int!("KEY5"),
+      thing: env_csv!("KEY6"),
+      thing: env_str!("KEY7")
+    `;
     const extractedEnvVars = extractReferencedEnvVars(fileContent, []);
-    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2']);
+    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2', 'KEY3', 'KEY4', 'KEY5', 'KEY6', 'KEY7']);
   });
 
   test('should extract referenced environment variables when the pipe syntax is used', () => {
@@ -18,15 +31,25 @@ describe('extractReferencedEnvVars', () => {
       |> foo_bar() # they start with a string literal
       # and even if they are broken by comments in between lines
       |> System.fetch_env!() # and with comments after the env call
-      |> other_func()  # and if they are piped afterwards`;
+      |> other_func()  # and if they are piped afterwards
+    "KEY3"
+    |> fetch_env!()
+    "KEY4" 
+    |> env_csv!() 
+    |> Enum.map()
+    "KEY5" |> env_int!() |> Timex.from_unix()
+    "KEY6"
+    |> env_atom!()
+    "KEY7" |> env_str!() |> String.downcase()
+    `;
 
     const extractedEnvVars = extractReferencedEnvVars(fileContent, []);
 
-    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2']);
+    expect(extractedEnvVars).toEqual(['DATABASE_URL', 'API_KEY', 'API_KEY_2', 'KEY3', 'KEY4', 'KEY5', 'KEY6', 'KEY7']);
   });
 
   test('should filter out ignored environment variables', () => {
-    const runtimeContent = 'System.fetch_env!("DATABASE_URL") + System.fetch_env!("API_KEY")';
+    const runtimeContent = 'System.fetch_env!("DATABASE_URL") + System.fetch_env!("API_KEY") + env_str!("API_KEY")';
     const ignoredKeys = ['API_KEY'];
 
     const extractedEnvVars = extractReferencedEnvVars(runtimeContent, ignoredKeys);
